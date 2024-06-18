@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string>
 
-const int width = 400;
-const int height = 300;
+const int width = 1600;
+const int height = 1200;
 const vec3 campos = vec3(0, 1, 2);
 const vec3 camray = vec3(0, -0.6, -2).normalize();
 const vec3 cam_horizontal_axis = vec3(4, 0, 0);
@@ -17,7 +17,7 @@ const int max_bounce_time = 20;
 const int montecarlo_count = 1;
 const vec3 skyray = vec3(1, -2, -0.4).normalize();
 const float sky_strength = 2;
-const float blur = 0.14;
+const float blur = 0.1;
 
 hitable_list *world;
 
