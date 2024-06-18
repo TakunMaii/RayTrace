@@ -13,7 +13,7 @@ const vec3 cam_horizontal_axis = vec3(4, 0, 0);
 const vec3 cam_vertical_axis = cam_horizontal_axis.cross(camray).normalize() * 3;
 const float cam_to_screen = 2.2;
 const float t_min = 0.01, t_max = 500;
-const int max_bounce_time = 5;
+const int max_bounce_time = 20;
 const int montecarlo_count = 1;
 const vec3 skyray = vec3(1, -2, -0.4).normalize();
 const float sky_strength = 2;
@@ -82,7 +82,7 @@ void ray_trace(ray r, vec3 lightCol, vec3 &pixelCol, int depth)
             }
         }
         ray outray = ray(hitrec.p, out);
-        lightCol = lightCol * hitrec.mat.color;
+        lightCol = lightCol * hitrec.mat.color * hitrec.mat.attenuation;
         float factor = - r.direction.dot(hitrec.normal);
         factor = (factor + 1) /2;
         pixelCol = pixelCol + lightCol * hitrec.mat.emission_color * hitrec.mat.emission_strength * factor;
@@ -121,6 +121,10 @@ vec3 fragshader(int x, int y)
         ray_trace(eyeray, vec3(1, 1, 1), pixelCol, 0);
         color = color + pixelCol;
     }
+
+    // color.x = sqrt(color.x);
+    // color.y = sqrt(color.y);
+    // color.z = sqrt(color.z);
 
     return color / montecarlo_count;
 }
