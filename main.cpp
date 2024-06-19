@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include "sdf_obj.hpp"
 
 const int width = 1600;
 const int height = 1200;
