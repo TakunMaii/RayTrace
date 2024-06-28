@@ -19,13 +19,13 @@ hitable_list *generator_room()
     vec3 v8 = vec3(-length, length, length);
 
     // matierals
-    material red = material(vec3(1, 0.3, 0.2), 0.9, 0.8);
-    material green = material(vec3(0.2, 1, 0.3), 0.9, 0.8);
-    material blue = material(vec3(0.3, 0.2, 1), 0.9, 0.8);
-    material white = material(vec3(1, 1, 1), 0.9, 0.8);
-    material yellow = material(vec3(1, 1, 0.2), 0.9, 0.8);
-    material purple = material(vec3(1, 0.3, 1), 0.9, 0.8);
-    material light = material(vec3(1, 1, 1), 0.9, 1).set_emission(vec3(1, 1, 1), 10);
+    material red = material(vec3(1, 0.3, 0.2), 0, 0.8);
+    material green = material(vec3(0.2, 1, 0.3), 0, 0.8);
+    material blue = material(vec3(0.3, 0.2, 1), 0, 0.8);
+    material white = material(vec3(1, 1, 1), 0, 0.8);
+    material yellow = material(vec3(1, 1, 0.2), 0, 0.8);
+    material purple = material(vec3(1, 0.3, 1), 0, 0.8);
+    material light = material(vec3(1, 1, 1), 0.9, 1).set_emission(vec3(1, 1, 1), 5);
 
     // ceiling
     list[num++] = new triangle(v3, v2, v1, white);
@@ -55,8 +55,9 @@ hitable_list *generator_room()
     list[num++] = new triangle(lamp3, lamp4, lamp1, light);
 
     //model
-    hitable_list *model = read_obj("model.obj", 0.1, material(vec3(0.9, 0.3, 0.1), 0.5, 0.8)
-    , material(vec3(0.5, 0.5, 0.5), 0.5, 0.5),0.06,vec3(0,-length/3+1,0));
+    hitable_list *model = read_obj("model.obj", material(vec3(0.7, 0.7, 0.7), 0.7, 0.7),0.03,vec3(-1.5,-length/3+1,0.3),true);
+    hitable_list *model2 = read_obj("objs/bishop_01.obj", material(vec3(0.7, 0.7, 0.7), 0.7, 0.7).set_refrection(0.99),0.04,vec3(1.3,1.3,-1.1),true);
     list[num++] = model;
+    list[num++] = model2;
     return new hitable_list(list, num);
 }

@@ -16,7 +16,8 @@ public:
     float refraction_index = 1.5;
 
     material() : color(vec3(0, 0, 0)), emission_color(vec3(0, 0, 0)) {}
-    material(vec3 color, float reflection_strength, float attenuation) : color(color), reflection_strength(reflection_strength), attenuation(attenuation) {
+    material(vec3 color, float reflection_strength, float attenuation) : color(color), reflection_strength(reflection_strength), attenuation(attenuation)
+    {
     }
     material set_refrection(float refraction, float index = 1.5)
     {
@@ -180,6 +181,9 @@ class hitable_list : public hitable
 public:
     hitable **list;
     int list_size;
+    bool bouncingBox = false;
+    vec3 lbf;
+    vec3 rub;
 
     hitable_list() {}
     hitable_list(hitable **list, int list_size) : list(list), list_size(list_size) {}
@@ -188,6 +192,84 @@ public:
     {
         hit_record temp_rec;
         bool hit_anything = false;
+
+        // boucing box test
+        if (bouncingBox)
+        {
+            bool flag = false;
+            vec3 dir = r.direction.normalize();
+            float t;
+            t = (lbf.z - r.origin.z) / dir.z;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.x > lbf.x &&
+                    p.x < rub.x &&
+                    p.y > lbf.y &&
+                    p.y < rub.y)
+                    flag = true;
+            }
+
+            t = (rub.z - r.origin.z) / dir.z;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.x > lbf.x &&
+                    p.x < rub.x &&
+                    p.y > lbf.y &&
+                    p.y < rub.y)
+                    flag = true;
+            }
+
+            t = (lbf.x - r.origin.x) / dir.x;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.z > rub.z &&
+                    p.z < lbf.z &&
+                    p.y > lbf.y &&
+                    p.y < rub.y)
+                    flag = true;
+            }
+
+            t = (rub.x - r.origin.x) / dir.x;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.z > rub.z &&
+                    p.z < lbf.z &&
+                    p.y > lbf.y &&
+                    p.y < rub.y)
+                    flag = true;
+            }
+
+            t = (rub.y - r.origin.y) / dir.y;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.z > rub.z &&
+                    p.z < lbf.z &&
+                    p.x > lbf.x &&
+                    p.x < rub.x)
+                    flag = true;
+            }
+
+            t = (lbf.y - r.origin.y) / dir.y;
+            if (t > 0)
+            {
+                vec3 p = r.point_at_parameter(t);
+                if (p.z > rub.z &&
+                    p.z < lbf.z &&
+                    p.x > lbf.x &&
+                    p.x < rub.x)
+                    flag = true;
+            }
+
+            if (!flag)
+                return false;
+        }
+        // end boucing box test
+
         float closest_so_far = t_max;
 
         for (int i = 0; i < list_size; i++)
@@ -201,6 +283,14 @@ public:
         }
 
         return hit_anything;
+    }
+
+    hitable_list* setBoucingBox(vec3 leftBottomFront, vec3 rightUpBack)
+    {
+        lbf = leftBottomFront;
+        rub = rightUpBack;
+        bouncingBox = true;
+        return this;
     }
 };
 

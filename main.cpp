@@ -5,19 +5,21 @@
 #include <stdlib.h>
 #include <string>
 #include "sdf_obj.hpp"
+#include "room.hpp"
+#include "time.h"
 
-const int width = 1600;
-const int height = 1200;
-const vec3 campos = vec3(0, 1, 2);
-const vec3 camray = vec3(0, -0.6, -2).normalize();
+const int width = 500;
+const int height = 500;
+const vec3 campos = vec3(0, 1.5, 2);
+const vec3 camray = vec3(0, -1.5, -2).normalize();
 const vec3 cam_horizontal_axis = vec3(4, 0, 0);
-const vec3 cam_vertical_axis = cam_horizontal_axis.cross(camray).normalize() * 3;
-const float cam_to_screen = 2.2;
+const vec3 cam_vertical_axis = cam_horizontal_axis.cross(camray).normalize() * 4;
+const float cam_to_screen = 1.78;
 const float t_min = 0.01, t_max = 500;
-const int max_bounce_time = 20;
-const int montecarlo_count = 1;
+const int max_bounce_time = 50;
+const int montecarlo_count = 5;
 const vec3 skyray = vec3(1, -2, -0.4).normalize();
-const float sky_strength = 2;
+const float sky_strength = 4;
 const float blur = 0.1;
 
 hitable_list *world;
@@ -33,15 +35,18 @@ vec3 get_sky_color(vec3 r)
 
 void setup_world()
 {
+    // world = generator_room();
+    // return;
     hitable **list = new hitable *[10];
     int num = 0;
 
-    list[num++] = new sphere(vec3(-0.8, 0.23, 0.95), 0.23, material(vec3(0.7, 0.7, 0.7), 0.95, 0.8));
-    list[num++] = new sphere(vec3(0.3, 0.3, 1.1), 0.3, material(vec3(0.5, 0.7, 0.5), 0.9, 0.92).set_refrection(0.7, 0.7));
-    list[num++] = new sphere(vec3(0.84, 0.6, 0), 0.6, material(vec3(1, 0.3, 0.5), 0.5, 0.5));
-    list[num++] = new sphere(vec3(0.2, 1.4, -2.2), 1.4, material(vec3(0.4, 0.3, 0.5), 0.95, 0.98).set_refrection(0.8, 1));
-    list[num++] = new sphere(vec3(-0.2, 0.12, 0.6), 0.12, material(vec3(1, 1, 1), 0.5, 0.5).set_emission(vec3(1, 1, 1), 3.5));
-    list[num++] = read_obj("model.obj", material(vec3(0.4, 0.8, 0.7), 0.5, 0.5), 0.02, vec3(-0.6, 0, 0));
+    list[num++] = new sphere(vec3(-0.2, 0.12, 1.1), 0.12, material(vec3(1, 1, 1), 0.5, 0.5).set_emission(vec3(1, 1, 1), 3.5));
+    list[num++] = new sphere(vec3(-0.8, 0.23, 1.45), 0.23, material(vec3(0.7, 0.7, 0.7), 0.95, 0.8));
+    list[num++] = new sphere(vec3(0.3, 0.3, 1.6), 0.3, material(vec3(0.5, 0.7, 0.5), 0.9, 0.92).set_refrection(0.7, 0.7));
+    list[num++] = new sphere(vec3(0.84, 0.6, 0.5), 0.6, material(vec3(1, 0.3, 0.5), 0.5, 0.5));
+    // list[num++] = new sdf_hitable(create_shpere_sdf(vec3(0.2, 1.4, -2.2), 1.4),material(vec3(0.4, 0.3, 0.5), 0.95, 0.98));
+    list[num++] = read_obj("model.obj", material(vec3(0.4, 0.8, 0.7), 0.5, 0.5), 0.02, vec3(-0.6, 0, 0.5), true);
+    list[num++] = read_obj("objs/queen_02.obj", material(vec3(0.8, 0.5, 0.4), 0.5, 0.5), 0.03, vec3(0.23, 0, -1.25), true);
     list[num++] = new plane(vec3(0, -1, 0), 0, material(vec3(0.4, 0.4, 0.4), 0.3, 0.5));
     world = new hitable_list(list, num);
 }
@@ -50,6 +55,7 @@ vec3 get_screen_pos(float u, float v)
 {
     return campos + camray * cam_to_screen + cam_horizontal_axis * (u - 0.5) + cam_vertical_axis * (v - 0.5);
 }
+
 
 void ray_trace(ray r, vec3 lightCol, vec3 &pixelCol, int depth)
 {
@@ -132,14 +138,21 @@ vec3 fragshader(int x, int y)
 
 int main()
 {
-    // initial_rand(341);
+    initial_rand(341);
     setup_world();
     img_renderer img = img_renderer(width, height, fragshader);
-    // img.render();
-    // img.save("output.ppm");
-    while (true)
-    {
-        img.render_and_mix("light2.ppm");
-    }
+
+    time_t start, end;
+    time(&start); 
+    img.render();
+    time(&end); 
+
+    img.save("outputs/output1.ppm");
+    printf("render one img in %.2f s",difftime(end, start));
+    // while (true)
+    // {
+    //     img.render_and_mix("room1.ppm");
+
+    // }
     return 0;
 }

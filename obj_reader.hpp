@@ -6,7 +6,7 @@
 #include "objects.hpp"
 
 // read a .obj file and return a hitable_list which contains all the triangles in the file
-hitable_list* read_obj(const char *filename, material triangle_mat, float scale = 1, vec3 bios = vec3(0,0,0))
+hitable_list* read_obj(const char *filename, material triangle_mat, float scale = 1, vec3 bios = vec3(0,0,0), bool autosetBoucing = false)
 {
     FILE *f = fopen(filename, "r");
     if (f == NULL)
@@ -24,6 +24,10 @@ hitable_list* read_obj(const char *filename, material triangle_mat, float scale 
 
     vec3 *vns = new vec3[10000];
     int vnnum = 0;
+
+    vec3 bb1 = vec3(0,0,0);
+    vec3 bb2 = vec3(0,0,0);
+
     // read lines
     char line[1000];
     while (fgets(line, 1000, f) != NULL)
@@ -34,7 +38,18 @@ hitable_list* read_obj(const char *filename, material triangle_mat, float scale 
             {
                 vec3 v;
                 sscanf(line, "v %f %f %f", &v.x, &v.y, &v.z);
-                vs[vnum++] = v * scale + bios;
+                vec3 changed = v * scale + bios;
+                vs[vnum++] = changed;
+                if(vnum == 1)
+                {
+                    bb1 = bb2 = changed;
+                }
+                bb1.x = min(bb1.x, changed.x);
+                bb2.x = max(bb2.x, changed.x);
+                bb1.y = min(bb1.y, changed.y);
+                bb2.y = max(bb2.y, changed.y);
+                bb1.z = min(bb1.z, changed.z);
+                bb2.z = max(bb2.z, changed.z);
             }
             else if(line[1] == 'n')
             {
@@ -67,7 +82,10 @@ hitable_list* read_obj(const char *filename, material triangle_mat, float scale 
 
 
     printf("read %d triangles, Done!\n", num);
-    return new hitable_list(list, num);
+    if(autosetBoucing)
+    return (new hitable_list(list, num))->setBoucingBox(bb1,bb2);
+    else
+    return (new hitable_list(list, num));
 }
 
 #endif
